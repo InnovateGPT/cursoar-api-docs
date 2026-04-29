@@ -683,16 +683,197 @@ function buildPage() {
       color: #000; font-weight: 700; font-size: 11px;
     }
 
-    /* ── Mobile ── */
-    @media (max-width: 900px) {
+    /* ── Hamburger toggle (hidden on desktop) ── */
+    .menu-btn {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 7px 9px;
+      cursor: pointer;
+      color: var(--text);
+      align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .menu-btn:hover { background: var(--bg-elevated); border-color: var(--border-strong); }
+    .menu-btn svg { width: 18px; height: 18px; display: block; }
+    .drawer-backdrop {
+      display: none;
+      position: fixed; inset: 0; z-index: 110;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .drawer-backdrop.open { opacity: 1; }
+
+    /* ── Tablet (≤1080px) ── */
+    @media (max-width: 1080px) {
+      :root { --sidebar-w: 260px; }
+      main { padding: 0 36px 100px; }
+      .topbar { padding: 0 18px; gap: 14px; }
+    }
+
+    /* ── Mobile (≤780px) ── */
+    @media (max-width: 780px) {
       :root { --sidebar-w: 0px; }
-      .layout { grid-template-columns: 1fr; }
-      aside { display: none; }
-      main { padding: 0 24px 80px; }
-      .hero { padding: 48px 0 32px; }
-      .section-header { grid-template-columns: 1fr; gap: 14px; }
-      .section-marker { padding-top: 0; }
-      .section-title-wrap { flex-direction: column; align-items: flex-start; }
+
+      /* Topbar — compact */
+      .topbar {
+        height: 56px;
+        padding: 0 14px;
+        gap: 10px;
+      }
+      .menu-btn { display: inline-flex; }
+      .brand { gap: 9px; min-width: 0; flex: 1; }
+      .brand img { width: 24px; height: 24px; flex-shrink: 0; }
+      .brand .name { font-size: 16px; }
+      .brand .sep, .brand .sub { display: none; }
+      .topbar-actions { gap: 4px; }
+      .topbar-actions a, .topbar-actions button {
+        padding: 6px 9px; font-size: 11px;
+      }
+      .topbar-actions .hide-sm { display: none; }
+      .topbar-actions svg { width: 12px; height: 12px; }
+
+      /* Layout */
+      .layout {
+        grid-template-columns: 1fr;
+        padding-top: 56px;
+      }
+
+      /* Sidebar becomes a drawer */
+      aside {
+        position: fixed; top: 56px; bottom: 0; left: 0;
+        width: min(86vw, 320px);
+        height: calc(100vh - 56px);
+        background: var(--bg-card);
+        border-right: 1px solid var(--border);
+        padding: 22px 0 22px 18px;
+        z-index: 120;
+        transform: translateX(-105%);
+        transition: transform 0.28s cubic-bezier(.2,.9,.3,1.1);
+        box-shadow: 30px 0 60px -10px rgba(0,0,0,0.5);
+      }
+      aside.open { transform: translateX(0); }
+      .drawer-backdrop { display: block; pointer-events: none; }
+      .drawer-backdrop.open { pointer-events: auto; }
+
+      /* Main */
+      main { padding: 0 20px 80px; max-width: 100%; }
+
+      /* Hero */
+      .hero { padding: 36px 0 24px; }
+      .hero-eyebrow { font-size: 10px; letter-spacing: 0.18em; }
+      .hero-eyebrow::before { width: 24px; }
+      .hero h1 {
+        font-size: clamp(38px, 11vw, 60px);
+        line-height: 0.98;
+      }
+      .hero blockquote {
+        font-size: 16px;
+        margin-top: 28px;
+        padding-left: 16px;
+      }
+      .hero-meta {
+        gap: 16px 24px;
+        margin-top: 28px;
+        padding-top: 22px;
+      }
+      .hero-meta strong { font-size: 13px; }
+
+      /* LLM bar */
+      .llm-bar { gap: 6px; }
+      .llm-bar a, .llm-bar button {
+        font-size: 11px; padding: 7px 10px;
+      }
+      .llm-bar svg { width: 11px; height: 11px; }
+
+      /* Sections */
+      .doc-section {
+        margin-top: 64px;
+        scroll-margin-top: 70px;
+      }
+      .section-header {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 22px;
+      }
+      .section-marker {
+        padding-top: 0;
+        display: flex; align-items: center; gap: 12px;
+      }
+      .marker-num { margin-bottom: 0; }
+      .marker-line { width: 40px; }
+      .section-title-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding-bottom: 14px;
+      }
+      .section-title {
+        font-size: clamp(26px, 7vw, 36px);
+      }
+      .copy-btn { width: 100%; justify-content: center; padding: 9px 12px; }
+
+      /* Body */
+      .section-body { font-size: 14.5px; }
+      .section-body h3 { font-size: 19px; margin-top: 28px; }
+      .section-body h4 { font-size: 12px; }
+      .section-body ul li, .section-body ol li { padding-left: 20px; }
+
+      /* Code blocks — smaller, scrollable */
+      pre {
+        padding: 16px 18px;
+        margin: 14px -4px;
+        border-radius: 6px;
+        font-size: 12px;
+      }
+      pre code { font-size: 12px; line-height: 1.6; }
+      code { font-size: 0.82em; }
+
+      /* Tables — full-width with edge bleeds */
+      .tbl-wrap {
+        margin: 16px -20px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        position: relative;
+      }
+      .tbl-wrap::after {
+        content: ""; position: absolute;
+        top: 0; bottom: 0; right: 0; width: 30px;
+        background: linear-gradient(to right, transparent, var(--bg-card));
+        pointer-events: none;
+      }
+      th { padding: 10px 14px; font-size: 10px; }
+      td { padding: 9px 14px; font-size: 12.5px; }
+      td code { font-size: 11px; }
+
+      /* Section divider */
+      .section-divider { margin-top: 48px; gap: 12px; }
+      .section-divider .glyph { font-size: 12px; }
+
+      /* Toast */
+      .toast {
+        bottom: 18px;
+        font-size: 12px;
+        padding: 10px 14px;
+        max-width: calc(100vw - 32px);
+      }
+
+      /* Reading progress thinner */
+      .progress { height: 2px; }
+    }
+
+    /* ── Tiny phones (≤380px) ── */
+    @media (max-width: 380px) {
+      .topbar-actions a, .topbar-actions button {
+        padding: 5px 7px;
+      }
+      .hero h1 { font-size: clamp(32px, 10vw, 44px); }
+      main { padding: 0 16px 60px; }
+      .tbl-wrap { margin: 14px -16px; }
     }
 
     /* ── Reveal animation ── */
@@ -723,6 +904,9 @@ function buildPage() {
 <div class="orb orb-2"></div>
 
 <header class="topbar">
+  <button class="menu-btn" id="menu-btn" aria-label="Open navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
   <div class="brand">
     <img src="/logo.png" alt="Cursoar">
     <span class="name">Cursoar</span>
@@ -732,13 +916,14 @@ function buildPage() {
   <div class="topbar-actions">
     <button id="copy-all" title="Copy entire markdown to clipboard">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-      Copy all
+      <span class="hide-sm">Copy all</span>
     </button>
-    <a href="/raw" target="_blank">Raw .md</a>
+    <a href="/raw" target="_blank" class="hide-sm">Raw .md</a>
     <a href="/llms.txt" target="_blank">llms.txt</a>
     <a href="/api-json" target="_blank">JSON</a>
   </div>
 </header>
+<div class="drawer-backdrop" id="drawer-backdrop"></div>
 
 <div class="layout">
 
@@ -841,6 +1026,33 @@ function buildPage() {
       const txt = item.textContent.toLowerCase();
       item.style.display = q && !txt.includes(q) ? "none" : "";
     });
+  });
+
+  // ── Mobile drawer ──
+  const aside = document.querySelector("aside");
+  const menuBtn = document.getElementById("menu-btn");
+  const backdrop = document.getElementById("drawer-backdrop");
+  function openDrawer() {
+    aside.classList.add("open");
+    backdrop.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeDrawer() {
+    aside.classList.remove("open");
+    backdrop.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+  menuBtn.addEventListener("click", () => {
+    aside.classList.contains("open") ? closeDrawer() : openDrawer();
+  });
+  backdrop.addEventListener("click", closeDrawer);
+  // Close drawer when a nav item is tapped on mobile
+  navItems.forEach(a => a.addEventListener("click", () => {
+    if (window.innerWidth <= 780) closeDrawer();
+  }));
+  // Close on Esc
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeDrawer();
   });
 
   // ── Copy section markdown ──
