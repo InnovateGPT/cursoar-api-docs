@@ -116,11 +116,12 @@ function renderBlocks(md) {
     const para = [];
     while (i < lines.length && lines[i].trim() !== "" &&
            !lines[i].startsWith("#") && !lines[i].startsWith("```") &&
-           !lines[i].startsWith(">") && !lines[i].startsWith("|") &&
+           !lines[i].startsWith(">") &&
            !lines[i].match(/^[-*]\s+/) && !lines[i].match(/^\d+\.\s+/) &&
            lines[i].trim() !== "---") {
       para.push(lines[i]); i++;
     }
+    if (para.length === 0) { i++; continue; }   // safety: never spin forever
     out += `<p>${inline(para.join(" "))}</p>\n`;
   }
   return out;
