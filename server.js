@@ -657,17 +657,25 @@ function buildPage() {
 
     /* ── Toast ── */
     .toast {
-      position: fixed; bottom: 32px; left: 50%;
-      transform: translateX(-50%) translateY(120%);
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(140%);
       background: var(--text); color: var(--bg);
-      padding: 12px 20px; border-radius: 6px;
+      padding: 11px 18px; border-radius: 6px;
       font-size: 13px; font-weight: 500;
       box-shadow: var(--shadow-lg);
-      transition: transform 0.3s cubic-bezier(.2,.9,.3,1.1);
+      transition: transform 0.28s cubic-bezier(.2,.9,.3,1.1), opacity 0.2s;
       z-index: 300;
       display: inline-flex; align-items: center; gap: 10px;
+      opacity: 0;
+      pointer-events: none;
+      cursor: pointer;
+      white-space: nowrap;
     }
-    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
     .toast .check {
       width: 16px; height: 16px;
       background: var(--accent); border-radius: 50%;
@@ -838,12 +846,18 @@ function buildPage() {
   // ── Copy section markdown ──
   const toast = document.getElementById("toast");
   const toastMsg = document.getElementById("toast-msg");
+  let toastTimer = null;
+  function hideToast() {
+    toast.classList.remove("show");
+    if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+  }
   function showToast(msg) {
     toastMsg.textContent = msg;
     toast.classList.add("show");
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(() => toast.classList.remove("show"), 2400);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 1600);
   }
+  toast.addEventListener("click", hideToast);
   async function copyText(text, label) {
     try {
       await navigator.clipboard.writeText(text);
