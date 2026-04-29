@@ -1,8 +1,8 @@
 # Cursoar API Reference
 
-> **Audience:** Phil, Jiarong, dev team. Single doc covering every API surface
-> the Cursoar app exposes — tRPC (web app), MCP HTTP (agents), and the few
-> standalone REST routes (auth, attachments, OAuth, realtime).
+> Single doc covering every API surface the Cursoar app exposes — tRPC (web app),
+> MCP HTTP (agents), and the few standalone REST routes (auth, attachments,
+> OAuth, realtime).
 >
 > **Source of truth:** the code in `apps/web/src/server/trpc/routers/` and
 > `apps/web/src/app/mcp/route.ts`. This doc is a snapshot — when in doubt,
