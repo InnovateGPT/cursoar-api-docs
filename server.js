@@ -756,9 +756,9 @@ function buildPage() {
       <div class="hero-eyebrow reveal reveal-1">Developer Reference · v1</div>
       <h1 class="reveal reveal-2">The Cursoar<br><em>API Codex.</em></h1>
       <blockquote class="reveal reveal-3">
-        <strong>Audience:</strong> Phil, Jiarong, dev team. Single doc covering every API surface
-        Cursoar exposes — tRPC (web app), MCP HTTP (agents), and the few standalone REST routes
-        (auth, attachments, OAuth, realtime).
+        Single doc covering every API surface Cursoar exposes — tRPC (web app),
+        MCP HTTP (agents), and the few standalone REST routes (auth, attachments,
+        OAuth, realtime). Use it with your LLM of choice.
       </blockquote>
       <div class="llm-bar reveal reveal-4">
         <button class="accent" id="hero-copy">
@@ -899,7 +899,7 @@ const server = createServer((req, res) => {
   } else if (url === "/llms.txt") {
     const llms = `# Cursoar API Codex
 
-> Complete Cursoar platform API documentation: tRPC web routes, MCP HTTP (84 tools), REST endpoints, OAuth flows, and Prisma schema reference. Audience: developers and AI agents implementing against Cursoar.
+> Complete Cursoar platform API documentation: tRPC web routes, MCP HTTP (84 tools), REST endpoints, OAuth flows, and Prisma schema reference. Drop into any LLM context window for accurate Cursoar implementation work.
 
 ## Surface map
 
