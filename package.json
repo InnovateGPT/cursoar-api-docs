@@ -1,0 +1,13 @@
+{
+  "name": "cursoar-api-docs",
+  "version": "1.0.0",
+  "description": "Cursoar API Reference — LLM-friendly developer documentation",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
