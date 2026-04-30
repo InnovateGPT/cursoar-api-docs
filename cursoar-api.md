@@ -2713,7 +2713,7 @@ Project
  ├── status: ACTIVE | ON_HOLD | COMPLETED | ARCHIVED
  ├── visibility: PRIVATE | TEAM_ONLY | PUBLIC
  ├── sections, tasks, members
- └── brainDumpOriginatedTasks (back-relation)
+ └── brainDumpOriginatedTasks (back-relation) ├── clientsCanSeeAllTasks                       (auto-added)
 
 Task
  ├── isExternal: bool                       ← client-portal exposure flag
