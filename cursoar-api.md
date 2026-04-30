@@ -2702,18 +2702,18 @@ eventBus.publish('task.moved', {
 User
  ├── userType: TEAM_MEMBER | CLIENT       ← drives portal redirect
  ├── role: OWNER | ADMIN | TEAM_MEMBER | GUEST   ← legacy system role
- └── many: WorkspaceMember, ProjectMember, TaskAssignee, Notification, AuditLog, Attachment
+ └── many: WorkspaceMember, ProjectMember, TaskAssignee, Notification, AuditLog, Attachment ├── clientReportsFiled                       (auto-added) ├── clientReportMessages                       (auto-added)
 
 Workspace
  ├── members: WorkspaceMember (role: OWNER | ADMIN | MEMBER | GUEST | GUEST_CLIENT)
- └── projects, portfolios, teams, invitations, customFields, tags, auditLogs
+ └── projects, portfolios, teams, invitations, customFields, tags, auditLogs ├── clientReports                       (auto-added)
 
 Project
  ├── kind: PROJECT | BRAIN_DUMP            ← brain dumps are Projects
  ├── status: ACTIVE | ON_HOLD | COMPLETED | ARCHIVED
  ├── visibility: PRIVATE | TEAM_ONLY | PUBLIC
  ├── sections, tasks, members
- └── brainDumpOriginatedTasks (back-relation) ├── clientsCanSeeAllTasks                       (auto-added)
+ └── brainDumpOriginatedTasks (back-relation) ├── clientsCanSeeAllTasks                       (auto-added) ├── clientsCanSeeAllTasks                       (auto-added)
 
 Task
  ├── isExternal: bool                       ← client-portal exposure flag
