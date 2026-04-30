@@ -1139,14 +1139,32 @@ const server = createServer((req, res) => {
 
 01. Surface map
 02. Authentication & authorization
-03. tRPC routers
-04. REST endpoints
-05. Client portal access model
-06. MCP tool reference (84 tools)
-07. Realtime event bus
-08. Schema cheat-sheet
-09. Conventions to follow
-10. Known gaps and TODO
+03. Workspaces
+04. Portfolios
+05. Projects
+06. Sections
+07. Tasks
+08. Subtasks & dependencies
+09. Comments
+10. Attachments
+11. Brain dumps
+12. Time tracking
+13. Client portal
+14. Reports
+15. SOW (Statement of Work)
+16. Custom fields
+17. Workload
+18. Search & "self" tools
+19. Notifications
+20. Users
+21. MCP tokens
+22. OAuth clients
+23. Chat, audit, teams, tags
+24. REST: OAuth (agent enrollment)
+25. REST: webhooks, realtime, sandbox, agents
+26. Realtime event bus
+27. Schema cheat-sheet
+28. Conventions & gaps
 
 ## Full content
 
