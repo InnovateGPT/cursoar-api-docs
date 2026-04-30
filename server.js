@@ -26,6 +26,72 @@ function slug(t) {
   return t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+// Map a markdown code-fence language to a friendly tab label.
+const LANG_LABELS = {
+  bash: "cURL",
+  curl: "cURL",
+  sh: "Shell",
+  shell: "Shell",
+  js: "JavaScript",
+  javascript: "JavaScript",
+  ts: "TypeScript",
+  typescript: "TypeScript",
+  py: "Python",
+  python: "Python",
+  json: "Response",
+  http: "HTTP",
+  html: "HTML",
+  css: "CSS",
+  sql: "SQL",
+};
+function langLabel(lang) {
+  return LANG_LABELS[lang] || (lang ? lang.toUpperCase() : "Code");
+}
+
+let codeBlockUid = 0;
+function renderCodeBlock(lang, body) {
+  codeBlockUid++;
+  const id = `cb-${codeBlockUid}`;
+  const label = langLabel(lang);
+  const isResponse = lang === "json";
+  return `<div class="code-block ${isResponse ? "is-response" : "is-request"}" data-lang="${lang}">
+    <div class="code-head">
+      <span class="code-lang">${label}</span>
+      <button class="code-copy" data-target="${id}" aria-label="Copy code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+    <pre data-lang="${lang}"><code id="${id}" class="lang-${lang}">${escapeHtml(body)}</code></pre>
+  </div>`;
+}
+function renderTabGroup(blocks) {
+  // blocks: [{ lang, body }, ...]
+  if (blocks.length === 1) return renderCodeBlock(blocks[0].lang, blocks[0].body);
+  codeBlockUid++;
+  const groupId = `cg-${codeBlockUid}`;
+  const tabs = blocks.map((b, idx) => {
+    const isActive = idx === 0;
+    return `<button class="tab-btn ${isActive ? "active" : ""}" data-tab="${groupId}-${idx}">${langLabel(b.lang)}</button>`;
+  }).join("");
+  const panels = blocks.map((b, idx) => {
+    codeBlockUid++;
+    const codeId = `cb-${codeBlockUid}`;
+    const isActive = idx === 0;
+    return `<div class="tab-panel ${isActive ? "active" : ""}" id="${groupId}-${idx}">
+      <button class="code-copy" data-target="${codeId}" aria-label="Copy code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span>Copy</span>
+      </button>
+      <pre data-lang="${b.lang}"><code id="${codeId}" class="lang-${b.lang}">${escapeHtml(b.body)}</code></pre>
+    </div>`;
+  }).join("");
+  return `<div class="code-tabs" data-group="${groupId}">
+    <div class="tab-bar">${tabs}</div>
+    ${panels}
+  </div>`;
+}
+
 function renderBlocks(md) {
   const lines = md.split("\n");
   let out = "";
@@ -33,16 +99,25 @@ function renderBlocks(md) {
   while (i < lines.length) {
     const line = lines[i];
 
-    // Fenced code
+    // Fenced code — collect this and any consecutive fences (≤1 blank line gap) into a tab group
     if (line.startsWith("```")) {
-      const lang = line.slice(3).trim();
-      const buf = [];
-      i++;
-      while (i < lines.length && !lines[i].startsWith("```")) {
-        buf.push(lines[i]); i++;
+      const blocks = [];
+      while (i < lines.length && lines[i].startsWith("```")) {
+        const lang = lines[i].slice(3).trim();
+        const buf = [];
+        i++;
+        while (i < lines.length && !lines[i].startsWith("```")) {
+          buf.push(lines[i]); i++;
+        }
+        i++; // skip closing ```
+        blocks.push({ lang, body: buf.join("\n") });
+        // Allow exactly one blank line between fences and still treat as a group
+        if (lines[i] !== undefined && lines[i].trim() === "" &&
+            lines[i+1] !== undefined && lines[i+1].startsWith("```")) {
+          i++;
+        }
       }
-      i++;
-      out += `<pre><code class="lang-${lang}">${escapeHtml(buf.join("\n"))}</code></pre>\n`;
+      out += renderTabGroup(blocks) + "\n";
       continue;
     }
 
@@ -585,7 +660,7 @@ function buildPage() {
     }
     .section-body blockquote p { margin: 0; }
 
-    /* ── Code ── */
+    /* ── Inline code ── */
     code {
       font-family: var(--mono); font-size: 0.86em;
       background: var(--bg-elevated);
@@ -594,24 +669,99 @@ function buildPage() {
       color: var(--text);
       letter-spacing: -0.01em;
     }
-    pre {
+
+    /* ── Standalone code block ── */
+    .code-block {
+      margin: 14px 0;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 22px 24px;
-      overflow-x: auto;
-      margin: 18px 0;
-      position: relative;
+      overflow: hidden;
     }
-    pre::before {
-      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 28px;
-      background: linear-gradient(to right, transparent, transparent 32px, var(--border) 32px, var(--border) 33px, transparent 33px);
-      pointer-events: none;
+    .code-block.is-response {
+      border-color: hsl(70 60% 30% / 0.5);
+      background: hsl(70 30% 8% / 0.3);
+    }
+    .code-block.is-response .code-lang { color: var(--accent); }
+    .code-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 12px 6px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.015);
+    }
+    .code-lang {
+      font-family: var(--mono); font-size: 10px;
+      color: var(--text-faint); font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.14em;
+    }
+    .code-copy {
+      font: inherit; font-size: 10.5px; font-weight: 500;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--text-faint);
+      background: transparent; border: none;
+      cursor: pointer; padding: 4px 6px; border-radius: 3px;
+      display: inline-flex; align-items: center; gap: 5px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .code-copy svg { width: 11px; height: 11px; }
+    .code-copy:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .code-copy.copied { color: var(--accent); }
+    pre {
+      margin: 0;
+      padding: 16px 18px;
+      overflow-x: auto;
+      background: transparent;
+      border: none;
     }
     pre code {
       background: none; border: none;
       padding: 0; color: var(--text);
-      font-size: 13px; line-height: 1.7;
+      font-size: 12.5px; line-height: 1.7;
+      font-family: var(--mono);
+    }
+
+    /* ── Tabbed code group (cURL / JS / Response) ── */
+    .code-tabs {
+      margin: 14px 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.015);
+      padding: 0 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      font: inherit; font-size: 10.5px; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text-faint);
+      background: transparent; border: none;
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+    .tab-panel {
+      display: none;
+      position: relative;
+    }
+    .tab-panel.active { display: block; }
+    .tab-panel .code-copy {
+      position: absolute; top: 8px; right: 10px;
+      z-index: 2;
+      background: rgba(28,28,28,0.7);
+      backdrop-filter: blur(6px);
+      padding: 4px 8px;
     }
 
     /* ── Tables ── */
@@ -823,14 +973,19 @@ function buildPage() {
       .section-body ul li, .section-body ol li { padding-left: 20px; }
 
       /* Code blocks — smaller, scrollable */
-      pre {
-        padding: 16px 18px;
-        margin: 14px -4px;
+      .code-block, .code-tabs {
+        margin: 12px -4px;
         border-radius: 6px;
+      }
+      pre {
+        padding: 12px 14px;
         font-size: 12px;
       }
       pre code { font-size: 12px; line-height: 1.6; }
       code { font-size: 0.82em; }
+      .tab-btn { padding: 9px 12px; font-size: 10px; letter-spacing: 0.1em; }
+      .code-head { padding: 6px 10px 5px 12px; }
+      .code-lang { font-size: 9.5px; }
 
       /* Tables — full-width with edge bleeds */
       .tbl-wrap {
@@ -1090,6 +1245,39 @@ function buildPage() {
         btn.classList.add("copied");
         const lbl = btn.querySelector(".copy-label");
         if (lbl) { const old = lbl.textContent; lbl.textContent = "Copied"; setTimeout(()=>{lbl.textContent=old; btn.classList.remove("copied");},1800); }
+      }
+    });
+  });
+
+  // ── Code tabs ──
+  document.querySelectorAll(".code-tabs").forEach(group => {
+    const btns = group.querySelectorAll(".tab-btn");
+    const panels = group.querySelectorAll(".tab-panel");
+    btns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        btns.forEach(b => b.classList.remove("active"));
+        panels.forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        const panel = group.querySelector("#" + btn.dataset.tab);
+        if (panel) panel.classList.add("active");
+      });
+    });
+  });
+
+  // ── Per-block copy buttons ──
+  document.querySelectorAll(".code-copy").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const target = document.getElementById(btn.dataset.target);
+      if (!target) return;
+      const ok = await copyText(target.textContent, "Copied");
+      if (ok) {
+        btn.classList.add("copied");
+        const lbl = btn.querySelector("span");
+        if (lbl) {
+          const old = lbl.textContent;
+          lbl.textContent = "Copied";
+          setTimeout(() => { lbl.textContent = old; btn.classList.remove("copied"); }, 1600);
+        }
       }
     });
   });
